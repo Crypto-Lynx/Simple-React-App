@@ -1,0 +1,53 @@
+services:
+  # Database service
+  db:
+    image: postgres:14  # Using PostgreSQL version 14 image
+    container_name: db  # Container name for the database
+    ports:
+      - "5432:5432"  # Exposing ports for database access
+    environment:
+      POSTGRES_USER: postgres  # Database username
+      POSTGRES_PASSWORD: "1532"  # Database user's password
+      POSTGRES_DB: students  # Database name
+    volumes:
+      - ./db/dump:/var/lib/postgresql/data  # Mounting local directory to store data
+    networks:
+      - app_network  # Connecting to the app network
+    restart: on-failure  # Restart policy for database container
+
+  # Backend service
+  api:
+    build:
+      context: ./api  # Path to the Dockerfile for the backend
+    container_name: api  # Container name for the backend
+    ports:
+      - "3000:3000"  # Exposing ports for backend API access
+    networks:
+      - app_network  # Connecting to the app network
+    environment:
+      DATABASE_URL: "postgresql://postgres:1532@db:5432/students"  # Database connection URL
+    depends_on:
+      - db  # Ensure that the database container starts first
+    restart: on-failure  # Restart policy for backend container
+
+  # Frontend service
+  frontend:
+    build:
+      context: ./frontend  # Path to the Dockerfile for the frontend
+    container_name: frontend  # Container name for the frontend
+    ports:
+      - "8000:80"  # Exposing ports for frontend web access
+    volumes:
+      - ./frontend/build:/usr/share/nginx/html
+    networks:
+      - app_network  # Connecting to the app network
+
+# Network configuration
+networks:
+  app_network:
+    driver: bridge  # Using bridge driver for the network
+
+# Volumes configuration for data persistence
+volumes:
+  dump:
+    external: false  # Creating an internal volume for data storage

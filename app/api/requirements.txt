@@ -1,0 +1,9 @@
+psycopg2-binary
+fastapi
+fastapi[standard]
+uvicorn
+uvicorn[standard]
+pydantic
+sqlalchemy
+bcrypt==4.0.1
+passlib
